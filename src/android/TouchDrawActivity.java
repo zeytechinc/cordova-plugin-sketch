@@ -342,12 +342,13 @@ public class TouchDrawActivity extends Activity {
     }
 
 	public void finishDrawing() {
-
+		// writes out final bitmap to a tempfile and sends back the path
 		try {
 			File file = File.createTempFile(UUID.randomUUID().toString(), null);
 
 			FileOutputStream filecon = new FileOutputStream(file);
 			mBitmap.compress(mEncodingType, 100, filecon);
+			filecon.close();
 
 			Intent drawingResult = new Intent();
 			drawingResult.putExtra(DRAWING_RESULT_PARCELABLE, file.getAbsolutePath());
@@ -356,7 +357,6 @@ public class TouchDrawActivity extends Activity {
 		} catch (IOException e) {
 			handleFileIOError(e);
 		}
-
     }
 
     @Override
