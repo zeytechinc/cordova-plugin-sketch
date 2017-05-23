@@ -278,11 +278,19 @@ public class Sketch extends CordovaPlugin {
 
         if (extras != null && extras.containsKey(TouchDrawActivity.DRAWING_RESULT_PARCELABLE)) {
             drawingPath = extras.getString(TouchDrawActivity.DRAWING_RESULT_PARCELABLE);
-			LOG.e(TAG, "Reading temp file from: " + drawingPath);
+			LOG.d(TAG, "Reading temp file from: " + drawingPath);
 			// decode the file and convert to byte array
 			Bitmap bm = BitmapFactory.decodeFile(drawingPath);
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();  
-			bm.compress(Bitmap.CompressFormat.PNG, 100, baos);  
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+			// write the image data to output stream using the right encoding type
+			if (encodingType == EncodingType.PNG) {
+				bm.compress(Bitmap.CompressFormat.PNG, 100, baos);  
+			} else {
+				bm.compress(Bitmap.CompressFormat.JPEG, 100, baos);  
+			}
+ 
+			// convert stream to array data
 			drawingData = baos.toByteArray(); 
         }
 
@@ -296,7 +304,7 @@ public class Sketch extends CordovaPlugin {
             String ext = "";
 
             if (encodingType == EncodingType.JPEG) {
-                ext = "jpeg";
+                ext = "jpg";
             } else if (encodingType == EncodingType.PNG) {
                 ext = "png";
             }

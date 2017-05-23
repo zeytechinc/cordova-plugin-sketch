@@ -342,20 +342,30 @@ public class TouchDrawActivity extends Activity {
     }
 
 	public void finishDrawing() {
-		// writes out final bitmap to a tempfile and sends back the path
-		try {
-			File file = File.createTempFile(UUID.randomUUID().toString(), null);
+		// checks if we have a valid bitmap first
+		if (mBitmap != null) {
+			// writes out final bitmap to a tempfile and sends back the path
+			try {
+				File file = File.createTempFile(UUID.randomUUID().toString(), null);
 
-			FileOutputStream filecon = new FileOutputStream(file);
-			mBitmap.compress(mEncodingType, 100, filecon);
-			filecon.close();
+				FileOutputStream filecon = new FileOutputStream(file);
+				mBitmap.compress(mEncodingType, 100, filecon);
+				filecon.close();
 
+				Intent drawingResult = new Intent();
+				drawingResult.putExtra(DRAWING_RESULT_PARCELABLE, file.getAbsolutePath());
+				setResult(Activity.RESULT_OK, drawingResult);
+				finish();
+			} catch (IOException e) {
+				handleFileIOError(e);
+			}
+		} else {
 			Intent drawingResult = new Intent();
-			drawingResult.putExtra(DRAWING_RESULT_PARCELABLE, file.getAbsolutePath());
-			setResult(Activity.RESULT_OK, drawingResult);
-			finish();
-		} catch (IOException e) {
-			handleFileIOError(e);
+
+            drawingResult.putExtra(DRAWING_RESULT_ERROR,
+                    "Had a technical problem drawing on the photo. Please try again.");
+            setResult(RESULT_TOUCHDRAW_ERROR, drawingResult);
+            finish();
 		}
     }
 
