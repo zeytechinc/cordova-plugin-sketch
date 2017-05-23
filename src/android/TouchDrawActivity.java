@@ -346,7 +346,16 @@ public class TouchDrawActivity extends Activity {
 		if (mBitmap != null) {
 			// writes out final bitmap to a tempfile and sends back the path
 			try {
-				File file = File.createTempFile(UUID.randomUUID().toString(), null);
+				String suffix = "";
+
+				if (mEncodingType == Bitmap.CompressFormat.JPEG) {
+					suffix = ".jpg";
+				} else {
+					suffix = ".png";
+				}
+
+				// Save the drawing to the app's cache/temp dir
+				File file = File.createTempFile(UUID.randomUUID().toString(), suffix);
 
 				FileOutputStream filecon = new FileOutputStream(file);
 				mBitmap.compress(mEncodingType, 100, filecon);
