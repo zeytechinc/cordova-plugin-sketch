@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -23,9 +24,11 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
+
 
 /**
  * Created by jt on 29/03/16.
@@ -122,6 +125,8 @@ public class Sketch extends CordovaPlugin {
                     touchDrawIntent.putExtra(TouchDrawActivity.DRAWING_RESULT_ENCODING_TYPE,
                             Bitmap.CompressFormat.JPEG.ordinal());
                 }
+
+				touchDrawIntent.putExtra(TouchDrawActivity.DRAWING_RESULT_TEMP_PATH, Sketch.this.cordova.getActivity().getCacheDir());
 
                 Sketch.this.cordova.getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -223,6 +228,8 @@ public class Sketch extends CordovaPlugin {
                             Bitmap.CompressFormat.JPEG.ordinal());
                 }
 
+				touchDrawIntent.putExtra(TouchDrawActivity.DRAWING_RESULT_TEMP_PATH, Sketch.this.cordova.getActivity().getCacheDir());
+
                 touchDrawIntent.putExtra(TouchDrawActivity.BACKGROUND_IMAGE_URL, inputData);
                 Sketch.this.cordova.getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -266,11 +273,17 @@ public class Sketch extends CordovaPlugin {
     private void saveDrawing(Intent intent) {
         Bundle extras = intent.getExtras();
         byte[] drawingData = null;
+		String drawingPath = null;
         String output = null;
 
-        if (extras != null &&
-                extras.containsKey(TouchDrawActivity.DRAWING_RESULT_PARCELABLE)) {
-            drawingData = extras.getByteArray(TouchDrawActivity.DRAWING_RESULT_PARCELABLE);
+        if (extras != null && extras.containsKey(TouchDrawActivity.DRAWING_RESULT_PARCELABLE)) {
+            drawingPath = extras.getString(TouchDrawActivity.DRAWING_RESULT_PARCELABLE);
+			LOG.e(TAG, "Reading temp file from: " + drawingPath);
+			// decode the file and conver to byte array
+			Bitmap bm = BitmapFactory.decodeFile(drawingPath);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();  
+			bm.compress(Bitmap.CompressFormat.PNG, 100, baos); //bm is the bitmap object   
+			drawingData = baos.toByteArray(); 
         }
 
         if (drawingData == null || drawingData.length == 0) {
@@ -291,13 +304,18 @@ public class Sketch extends CordovaPlugin {
             if (destinationType == DestinationType.DATA_URL) {
                 output = "data:image/" + ext + ";base64," + Base64.encodeToString(drawingData, Base64.DEFAULT);
             } else if (destinationType == DestinationType.FILE_URI) {
-                // Save the drawing to the app's cache dir
+                // Save the drawing to the app's dir
+				// Changed by Matthew to store to getFilesDir instead of getCacheDir - May 19, 2017
                 String fileName = String.format("sketch-%s.%s", UUID.randomUUID(), ext);
-                File filePath = new File(this.cordova.getActivity().getCacheDir(), fileName);
+                File filePath = new File(this.cordova.getActivity().getFilesDir(), fileName);
 
                 FileOutputStream fos = new FileOutputStream(filePath);
                 fos.write(drawingData);
                 fos.close();
+
+				// Delete temp File
+				File tempFile = new File(drawingPath);
+				tempFile.delete();
 
                 // Add the drawing to photo gallery
                 String appName = getApplicationLabelOrPackageName(this.cordova.getActivity());
