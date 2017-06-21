@@ -49,7 +49,7 @@ public class TouchDrawActivity extends Activity {
     public static final int RESULT_TOUCHDRAW_ERROR = Activity.RESULT_FIRST_USER;
     public static final String DRAWING_RESULT_SCALE = "drawing_scale";
     public static final String DRAWING_RESULT_ENCODING_TYPE = "drawing_encoding_type";
-	public static final String DRAWING_RESULT_TEMP_PATH = "drawing_temp_path";
+    public static final String DRAWING_RESULT_TEMP_PATH = "drawing_temp_path";
 
     private Paint mPaint;
     private int mStrokeWidth = 4;
@@ -58,7 +58,7 @@ public class TouchDrawActivity extends Activity {
     private BackgroundImageType mBackgroundImageType = BackgroundImageType.COLOUR;
     private String mBackgroundColor = "#FFFFFF";
     private String mBackgroundImageUrl = "";
-	private String mTempFilePath = "";
+    private String mTempFilePath = "";
     private Bitmap.CompressFormat mEncodingType = Bitmap.CompressFormat.PNG;
     private int a, r, g, b; //Decoded ARGB color values for the background and erasing
 
@@ -84,7 +84,7 @@ public class TouchDrawActivity extends Activity {
                     intentExtras.getInt(BACKGROUND_IMAGE_TYPE, BackgroundImageType.COLOUR.ordinal())];
             mBackgroundImageUrl = intentExtras.getString(BACKGROUND_IMAGE_URL, mBackgroundImageUrl);
             mBackgroundColor = intentExtras.getString(BACKGROUND_COLOUR, mBackgroundColor);
-			mTempFilePath = intentExtras.getString(DRAWING_RESULT_TEMP_PATH, mTempFilePath);
+            mTempFilePath = intentExtras.getString(DRAWING_RESULT_TEMP_PATH, mTempFilePath);
             mStrokeWidth = intentExtras.getInt(STROKE_WIDTH, mStrokeWidth);
             mEncodingType = Bitmap.CompressFormat.values()[
                     intentExtras.getInt(DRAWING_RESULT_ENCODING_TYPE, mEncodingType.ordinal())];
@@ -341,41 +341,41 @@ public class TouchDrawActivity extends Activity {
         super.onBackPressed();
     }
 
-	public void finishDrawing() {
-		// checks if we have a valid bitmap first
-		if (mBitmap != null) {
-			// writes out final bitmap to a tempfile and sends back the path
-			try {
-				String suffix = "";
+    public void finishDrawing() {
+        // checks if we have a valid bitmap first
+        if (mBitmap != null) {
+            // writes out final bitmap to a tempfile and sends back the path
+            try {
+                String suffix = "";
 
-				if (mEncodingType == Bitmap.CompressFormat.JPEG) {
-					suffix = ".jpg";
-				} else {
-					suffix = ".png";
-				}
+                if (mEncodingType == Bitmap.CompressFormat.JPEG) {
+                    suffix = ".jpg";
+                } else {
+                    suffix = ".png";
+                }
 
-				// Save the drawing to the app's cache/temp dir
-				File file = File.createTempFile(UUID.randomUUID().toString(), suffix);
+                // Save the drawing to the app's cache/temp dir
+                File file = File.createTempFile(UUID.randomUUID().toString(), suffix);
 
-				FileOutputStream filecon = new FileOutputStream(file);
-				mBitmap.compress(mEncodingType, 100, filecon);
-				filecon.close();
+                FileOutputStream filecon = new FileOutputStream(file);
+                mBitmap.compress(mEncodingType, 100, filecon);
+                filecon.close();
 
-				Intent drawingResult = new Intent();
-				drawingResult.putExtra(DRAWING_RESULT_PARCELABLE, file.getAbsolutePath());
-				setResult(Activity.RESULT_OK, drawingResult);
-				finish();
-			} catch (IOException e) {
-				handleFileIOError(e);
-			}
-		} else {
-			Intent drawingResult = new Intent();
+                Intent drawingResult = new Intent();
+                drawingResult.putExtra(DRAWING_RESULT_PARCELABLE, file.getAbsolutePath());
+                setResult(Activity.RESULT_OK, drawingResult);
+                finish();
+            } catch (IOException e) {
+                handleFileIOError(e);
+            }
+        } else {
+            Intent drawingResult = new Intent();
 
             drawingResult.putExtra(DRAWING_RESULT_ERROR,
                     "Had a technical problem drawing on the photo. Please try again.");
             setResult(RESULT_TOUCHDRAW_ERROR, drawingResult);
             finish();
-		}
+        }
     }
 
     @Override

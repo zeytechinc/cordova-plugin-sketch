@@ -126,7 +126,7 @@ public class Sketch extends CordovaPlugin {
                             Bitmap.CompressFormat.JPEG.ordinal());
                 }
 
-				touchDrawIntent.putExtra(TouchDrawActivity.DRAWING_RESULT_TEMP_PATH, Sketch.this.cordova.getActivity().getCacheDir());
+                touchDrawIntent.putExtra(TouchDrawActivity.DRAWING_RESULT_TEMP_PATH, Sketch.this.cordova.getActivity().getCacheDir());
 
                 Sketch.this.cordova.getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -228,7 +228,7 @@ public class Sketch extends CordovaPlugin {
                             Bitmap.CompressFormat.JPEG.ordinal());
                 }
 
-				touchDrawIntent.putExtra(TouchDrawActivity.DRAWING_RESULT_TEMP_PATH, Sketch.this.cordova.getActivity().getCacheDir());
+                touchDrawIntent.putExtra(TouchDrawActivity.DRAWING_RESULT_TEMP_PATH, Sketch.this.cordova.getActivity().getCacheDir());
 
                 touchDrawIntent.putExtra(TouchDrawActivity.BACKGROUND_IMAGE_URL, inputData);
                 Sketch.this.cordova.getActivity().runOnUiThread(new Runnable() {
@@ -272,53 +272,53 @@ public class Sketch extends CordovaPlugin {
 
     private void saveDrawing(Intent intent) {
         Bundle extras = intent.getExtras();
-		String drawingPath = null;
+        String drawingPath = null;
         String output = null;
 
         if (extras != null && extras.containsKey(TouchDrawActivity.DRAWING_RESULT_PARCELABLE)) {
             drawingPath = extras.getString(TouchDrawActivity.DRAWING_RESULT_PARCELABLE);
-			LOG.d(TAG, "Signaled we have a temp file in: " + drawingPath);
+            LOG.d(TAG, "Signaled we have a temp file in: " + drawingPath);
         }
 
-		// Error out if we didn't get back a file path
-		if (drawingPath == null || drawingPath.length() == 0) {
-			LOG.e(TAG, "Failed to read sketch result from activity");
-			this.callbackContext.error("Failed to read sketch result from activity");
-			return;
-		}
+        // Error out if we didn't get back a file path
+        if (drawingPath == null || drawingPath.length() == 0) {
+            LOG.e(TAG, "Failed to read sketch result from activity");
+            this.callbackContext.error("Failed to read sketch result from activity");
+            return;
+        }
 
         try {
             if (destinationType == DestinationType.DATA_URL) {
-				String dataenc = "";
-				byte[] drawingData = null;
+                String dataenc = "";
+                byte[] drawingData = null;
 
-				if (encodingType == EncodingType.JPEG) {
-					dataenc = "jpeg";
-				} else if (encodingType == EncodingType.PNG) {
-					dataenc = "png";
-				}
+                if (encodingType == EncodingType.JPEG) {
+                    dataenc = "jpeg";
+                } else if (encodingType == EncodingType.PNG) {
+                    dataenc = "png";
+                }
 
-				LOG.d(TAG, "Reading temp file from: " + drawingPath);
-				// decode the file and convert to byte array
-				Bitmap bm = BitmapFactory.decodeFile(drawingPath);
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                LOG.d(TAG, "Reading temp file from: " + drawingPath);
+                // decode the file and convert to byte array
+                Bitmap bm = BitmapFactory.decodeFile(drawingPath);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-				// write the image data to output stream using the right encoding type
-				if (encodingType == EncodingType.PNG) {
-					bm.compress(Bitmap.CompressFormat.PNG, 100, baos);  
-				} else {
-					bm.compress(Bitmap.CompressFormat.JPEG, 100, baos);  
-				}
+                // write the image data to output stream using the right encoding type
+                if (encodingType == EncodingType.PNG) {
+                    bm.compress(Bitmap.CompressFormat.PNG, 100, baos);  
+                } else {
+                    bm.compress(Bitmap.CompressFormat.JPEG, 100, baos);  
+                }
  
-				// convert stream to array data
-				drawingData = baos.toByteArray();
+                // convert stream to array data
+                drawingData = baos.toByteArray();
 
-				// error out if we didn't successfully read back the temp file
-				if (drawingData == null || drawingData.length == 0) {
-					LOG.e(TAG, "Failed to read sketch result from activity");
-					this.callbackContext.error("Failed to read sketch result from activity");
-					return;
-				}
+                // error out if we didn't successfully read back the temp file
+                if (drawingData == null || drawingData.length == 0) {
+                    LOG.e(TAG, "Failed to read sketch result from activity");
+                    this.callbackContext.error("Failed to read sketch result from activity");
+                    return;
+                }
 
                 output = "data:image/" + dataenc + ";base64," + Base64.encodeToString(drawingData, Base64.DEFAULT);
             } else if (destinationType == DestinationType.FILE_URI) {
