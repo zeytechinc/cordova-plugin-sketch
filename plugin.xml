@@ -57,7 +57,8 @@
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
             <activity
                 android:name="au.com.blinkmobile.cordova.sketch.TouchDrawActivity"
-                android:configChanges="orientation|screenSize" >
+                android:configChanges="orientation|screenSize"
+                android:theme="@style/SketchTheme" >
             </activity>
         </config-file>
         <!-- Required for saving generated sketches to the photo library -->
