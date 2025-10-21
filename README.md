@@ -5,7 +5,8 @@ This plugin defines a navigator.Sketch object, which supplies an interface to la
 ## Installation
 
 ```sh
-cordova plugin add https://github.com/MatthewKapteyn/cordova-plugin-sketch.git
+git clone https://github.com/zeytechinc/cordova-plugin-sketch
+cordova plugin add https://github.com/zeytechinc/cordova-plugin-sketch.git
 ```
 
 ## Sketch.getSketch
