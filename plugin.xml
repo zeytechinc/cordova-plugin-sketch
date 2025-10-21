@@ -69,6 +69,7 @@
             target-dir="src/au/com/blinkmobile/cordova/sketch" />
         <source-file src="src/android/TouchDrawActivity.java"
             target-dir="src/au/com/blinkmobile/cordova/sketch" />
+        <resource-file src="src/android/res/values/styles.xml" target="app/src/main/res/values/styles.xml" />
     </platform>
 
 </plugin>
