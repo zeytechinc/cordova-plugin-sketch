@@ -132,7 +132,7 @@
 
 - (void)setUpToolbar
 {
-    self.btColour = [[UIBarButtonItem alloc] initWithTitle:@"Colour"
+    self.btColour = [[UIBarButtonItem alloc] initWithTitle:@"Color"
                                                      style:UIBarButtonItemStylePlain
                                                     target:self
                                                     action:@selector(toggleColour:event:)];
@@ -279,12 +279,16 @@
 
         coloursShown = YES;
 
-        float toolBarOriginY = self.navigationController.toolbar.frame.origin.y;
+        float topSafeY = self.view.safeAreaLayoutGuide.layoutFrame.origin.y;
+        float buttonSize = 50.0;
+        float spacing = 10.0;
+        float topOffset = 50.0;
+
         [UIView animateWithDuration:0.3 animations:^{
-            self.redButton.frame = CGRectMake(10.0, toolBarOriginY - 4*(50.0 + 10.0), 50.0, 50.0);
-            self.blueButton.frame = CGRectMake(10.0, toolBarOriginY - 3*(50.0 + 10.0), 50.0, 50.0);
-            self.greenButton.frame = CGRectMake(10.0, toolBarOriginY - 2*(50.0 + 10.0), 50.0, 50.0);
-            self.blackButton.frame = CGRectMake(10.0, toolBarOriginY - (50.0 + 10.0), 50.0, 50.0);
+            self.redButton.frame = CGRectMake(10.0, topSafeY + topOffset, buttonSize, buttonSize);
+            self.blueButton.frame = CGRectMake(10.0, topSafeY + topOffset + (buttonSize + spacing), buttonSize, buttonSize);
+            self.greenButton.frame = CGRectMake(10.0, topSafeY + topOffset + 2*(buttonSize + spacing), buttonSize, buttonSize);
+            self.blackButton.frame = CGRectMake(10.0, topSafeY + topOffset + 3*(buttonSize + spacing), buttonSize, buttonSize);
 
             self.redButton.alpha = 1.0;
             self.greenButton.alpha = 1.0;
