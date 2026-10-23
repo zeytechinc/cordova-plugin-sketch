@@ -9,15 +9,16 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.Display;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowInsets;
+import android.view.WindowMetrics;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -27,6 +28,12 @@ import android.util.Base64;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import androidx.activity.ComponentActivity;
+import androidx.activity.OnBackPressedCallback;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -39,7 +46,7 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.UUID;
 
-public class TouchDrawActivity extends Activity {
+public class TouchDrawActivity extends ComponentActivity {
     public static final String DRAWING_RESULT_PARCELABLE = "drawing_result";
     public static final String DRAWING_RESULT_ERROR = "drawing_error";
     public static final String BACKGROUND_IMAGE_TYPE = "background_image_type";
@@ -133,6 +140,23 @@ public class TouchDrawActivity extends Activity {
 
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(tDLayout);
+
+        // From Android 15 the window always draws behind the system bars, so keep the
+        // button bar, tool bar, and canvas inside them.
+        ViewCompat.setOnApplyWindowInsetsListener(tDLayout, (view, insets) -> {
+            Insets bars = insets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+            view.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+            return WindowInsetsCompat.CONSUMED;
+        });
+
+        // Android 16 no longer calls onBackPressed(); predictive back goes through the dispatcher.
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                cancelDrawing();
+            }
+        });
 
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
@@ -335,12 +359,6 @@ public class TouchDrawActivity extends Activity {
         finish();
     }
 
-    @Override
-    public void onBackPressed() {
-        cancelDrawing();
-        super.onBackPressed();
-    }
-
     public void finishDrawing() {
         // checks if we have a valid bitmap first
         if (mBitmap != null) {
@@ -394,24 +412,14 @@ public class TouchDrawActivity extends Activity {
         private Path mPath;
         private Paint   mBitmapPaint;
 
-        @SuppressWarnings("deprecation")
         public TouchDrawView(Context context) {
             super(context);
-            Display display = getWindowManager().getDefaultDisplay();
-            int canvasWidth;
-            int canvasHeight;
 
             if (mBackgroundImageType == BackgroundImageType.COLOUR) {
-                if (Build.VERSION.SDK_INT >= 13) {
-                    Point p = new Point();
-                    display.getSize(p);
-
-                    canvasWidth = p.x;
-                    canvasHeight = p.y;
-                } else {
-                    canvasWidth = display.getWidth();      // Deprecated in SDK Versions >= 13
-                    canvasHeight = display.getHeight();    // Deprecated in SDK Versions >= 13
-                }
+                // Initial size only; onSizeChanged() rescales the bitmap to the view.
+                Rect contentBounds = getWindowContentBounds();
+                int canvasWidth = contentBounds.width();
+                int canvasHeight = contentBounds.height();
 
                 mBitmap = Bitmap.createBitmap(canvasWidth, canvasHeight,
                         Bitmap.Config.ARGB_8888);
@@ -532,6 +540,23 @@ public class TouchDrawActivity extends Activity {
             }
             return true;
         }
+    }
+
+    // The window size minus system bars and cutouts, matching what Display.getSize() reported.
+    @SuppressWarnings("deprecation")
+    private Rect getWindowContentBounds() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowMetrics windowMetrics = getWindowManager().getCurrentWindowMetrics();
+            android.graphics.Insets bars = windowMetrics.getWindowInsets().getInsetsIgnoringVisibility(
+                    WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+            Rect bounds = windowMetrics.getBounds();
+            return new Rect(0, 0,
+                    bounds.width() - bars.left - bars.right,
+                    bounds.height() - bars.top - bars.bottom);
+        }
+        android.graphics.Point size = new android.graphics.Point();
+        getWindowManager().getDefaultDisplay().getSize(size);
+        return new Rect(0, 0, size.x, size.y);
     }
 
     private Bitmap loadMutableBitmapFromFileURI(URI uri) throws FileNotFoundException, URISyntaxException {
