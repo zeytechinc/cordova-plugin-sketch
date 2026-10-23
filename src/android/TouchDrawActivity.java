@@ -33,6 +33,7 @@ import androidx.activity.ComponentActivity;
 import androidx.activity.OnBackPressedCallback;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import java.io.ByteArrayOutputStream;
@@ -149,6 +150,12 @@ public class TouchDrawActivity extends ComponentActivity {
             view.setPadding(bars.left, bars.top, bars.right, bars.bottom);
             return WindowInsetsCompat.CONSUMED;
         });
+        // The theme's status/navigation bar colours are ignored from Android 15, so the bars
+        // show this screen's light background; use dark icons to keep them readable.
+        WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView())
+                .setAppearanceLightStatusBars(true);
+        WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView())
+                .setAppearanceLightNavigationBars(true);
 
         // Android 16 no longer calls onBackPressed(); predictive back goes through the dispatcher.
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
